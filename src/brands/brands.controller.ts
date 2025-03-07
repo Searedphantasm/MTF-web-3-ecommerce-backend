@@ -13,13 +13,16 @@ import { BrandsService } from './brands.service';
 import { GetBrandsFilterDto } from './dto/get-brands-filter.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { Brand } from './brand.entity';
+import { ResponseInterface } from '../response.interface';
 
 @Controller('brands')
 export class BrandsController {
   constructor(private brandService: BrandsService) {}
 
   @Get()
-  getBrands(@Query() brandsFilterDto: GetBrandsFilterDto) {
+  getBrands(
+    @Query() brandsFilterDto: GetBrandsFilterDto,
+  ): Promise<ResponseInterface<Brand[]>> {
     return this.brandService.getBrands(brandsFilterDto);
   }
 

@@ -20,6 +20,7 @@ import { ProductImage } from '../product_image/product_image.entity';
 import { ProductSpecification } from '../product_specification/product_specification.entity';
 import { ProductStatus } from './product-status.enum';
 import { ProductColorsEntity } from './product-colors.entity';
+import { GetAllProductResponseDto } from './dto/get-all-product-response.dto';
 @Controller('products')
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -27,7 +28,7 @@ export class ProductsController {
   @Get()
   getProducts(
     @Query() filterDto: GetProductsFilterDto,
-  ): Promise<ResponseInterface<Product[]>> {
+  ): Promise<ResponseInterface<GetAllProductResponseDto[]>> {
     return this.productsService.getProducts(filterDto);
   }
 

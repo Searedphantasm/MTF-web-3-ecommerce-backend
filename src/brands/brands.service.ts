@@ -4,6 +4,9 @@ import { Brand } from './brand.entity';
 import { Repository } from 'typeorm';
 import { GetBrandsFilterDto } from './dto/get-brands-filter.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
+import { ResponseInterface } from '../response.interface';
+import { GetAllProductResponseDto } from '../products/dto/get-all-product-response.dto';
+import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class BrandsService {
@@ -11,8 +14,13 @@ export class BrandsService {
     @InjectRepository(Brand) private brandRepository: Repository<Brand>,
   ) {}
 
-  async getBrands(filterDto: GetBrandsFilterDto): Promise<Brand[]> {
-    const { search } = filterDto;
+  async getBrands(
+    filterDto: GetBrandsFilterDto,
+  ): Promise<ResponseInterface<Brand[]>> {
+    const { search, page = '1', limit = '10' } = filterDto;
+
+    const parsedPage = parseInt(page, 10);
+    const parsedLimit = parseInt(limit, 10);
 
     const query = this.brandRepository.createQueryBuilder('b');
 
@@ -22,7 +30,19 @@ export class BrandsService {
       });
     }
 
-    return await query.getMany();
+    const [data, total] = await query
+      .take(parsedLimit)
+      .skip((parsedPage - 1) * parsedLimit)
+      .getManyAndCount();
+
+    const result: ResponseInterface<Brand[]> = {
+      data: data,
+      total,
+      page: parsedPage,
+      totalPages: Math.ceil(total / parsedLimit),
+    };
+
+    return result;
   }
 
   async getBrandById(id: number): Promise<Brand> {

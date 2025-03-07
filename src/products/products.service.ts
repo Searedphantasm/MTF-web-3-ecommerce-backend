@@ -21,7 +21,8 @@ import { Brand } from '../brands/brand.entity';
 import { ProductColorsEntity } from './product-colors.entity';
 import { ProductStatus } from './product-status.enum';
 import { ProductReview } from './product-review.entity';
-import { GetProductReviewsDto } from './dto/get-product-reviews.dto';
+import { plainToInstance } from 'class-transformer';
+import { GetAllProductResponseDto } from './dto/get-all-product-response.dto';
 
 @Injectable()
 export class ProductsService {
@@ -66,7 +67,7 @@ export class ProductsService {
 
   async getProducts(
     filterDto: GetProductsFilterDto,
-  ): Promise<ResponseInterface<Product[]>> {
+  ): Promise<ResponseInterface<GetAllProductResponseDto[]>> {
     const { search, brand, sub_category, page, limit, category, orderBy } =
       filterDto;
     const query = this.productRepository
@@ -141,8 +142,8 @@ export class ProductsService {
       .skip((parsedPage - 1) * parsedLimit)
       .getManyAndCount();
 
-    const result: ResponseInterface<Product[]> = {
-      data,
+    const result: ResponseInterface<GetAllProductResponseDto[]> = {
+      data: plainToInstance(GetAllProductResponseDto, data),
       total,
       page: parsedPage,
       totalPages: Math.ceil(total / parsedLimit),
