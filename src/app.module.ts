@@ -9,6 +9,7 @@ import { CategoryModule } from './category/category.module';
 import { SubCategoriesModule } from './sub-categories/sub-categories.module';
 import { BrandsModule } from './brands/brands.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       }),
       inject: [ConfigService], // Inject ConfigService into the factory
     }),
+    UserModule,
   ],
   controllers: [AppController],
   providers: [AppService],
