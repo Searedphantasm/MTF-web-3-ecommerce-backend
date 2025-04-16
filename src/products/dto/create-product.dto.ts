@@ -12,7 +12,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import { ProductStatus } from '../product-status.enum';
 import { CreateProductImageDto } from '../../product_image/dto/create-product-image.dto';
 import { CreateProductSpecificationDto } from '../../product_specification/dto/create-product.dto';
-import { ProductColorsEntity } from '../product-colors.entity';
 
 export class CreateProductDto {
   @ApiProperty({ required: true, description: 'The title of the product' })
@@ -121,13 +120,4 @@ export class CreateProductDto {
   @IsNotEmpty()
   @IsArray()
   images: CreateProductImageDto[];
-
-  @ApiProperty({
-    required: false,
-    type: [ProductColorsEntity],
-    description: 'Product colors (optional)',
-  })
-  @IsOptional()
-  @IsArray()
-  colors: ProductColorsEntity[];
 }

@@ -16,7 +16,7 @@ import { SubCategory } from '../sub-categories/sub-category.entity';
 import { Brand } from '../brands/brand.entity';
 import { ProductSpecification } from '../product_specification/product_specification.entity';
 import { ProductImage } from '../product_image/product_image.entity';
-import { ProductColorsEntity } from './product-colors.entity';
+
 import { ProductReview } from './product-review.entity';
 
 @Entity()
@@ -95,13 +95,6 @@ export class Product {
     },
   )
   specifications: ProductSpecification[];
-
-  @OneToMany(() => ProductColorsEntity, (colors) => colors.product, {
-    nullable: true,
-    cascade: true,
-    onDelete: 'NO ACTION',
-  })
-  colors: ProductColorsEntity[];
 
   @OneToMany(() => ProductImage, (productImage) => productImage.product, {
     eager: true,

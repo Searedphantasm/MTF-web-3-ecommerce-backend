@@ -19,7 +19,6 @@ import { ResponseInterface } from '../response.interface';
 import { ProductImage } from '../product_image/product_image.entity';
 import { ProductSpecification } from '../product_specification/product_specification.entity';
 import { ProductStatus } from './product-status.enum';
-import { ProductColorsEntity } from './product-colors.entity';
 import { GetAllProductResponseDto } from './dto/get-all-product-response.dto';
 @Controller('products')
 export class ProductsController {
@@ -84,19 +83,6 @@ export class ProductsController {
   // ): Promise<Product> {
   //   return this.productsService.updateProductSpec(productSpecifications, id);
   // }
-
-  @Patch('/:id/colors-stock')
-  updateProductColors(
-    @Body('colors') productColors: ProductColorsEntity[],
-    @Body('product_stock') product_stock: number,
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<void> {
-    return this.productsService.updateProductColors(
-      productColors,
-      product_stock,
-      id,
-    );
-  }
 
   @Patch('/:id/price')
   updateProductPrice(

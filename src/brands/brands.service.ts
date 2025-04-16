@@ -5,8 +5,6 @@ import { Repository } from 'typeorm';
 import { GetBrandsFilterDto } from './dto/get-brands-filter.dto';
 import { CreateBrandDto } from './dto/create-brand.dto';
 import { ResponseInterface } from '../response.interface';
-import { GetAllProductResponseDto } from '../products/dto/get-all-product-response.dto';
-import { plainToInstance } from 'class-transformer';
 
 @Injectable()
 export class BrandsService {

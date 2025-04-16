@@ -18,7 +18,6 @@ import { ProductSpecification } from '../product_specification/product_specifica
 import { ProductImage } from '../product_image/product_image.entity';
 import { SubCategory } from '../sub-categories/sub-category.entity';
 import { Brand } from '../brands/brand.entity';
-import { ProductColorsEntity } from './product-colors.entity';
 import { ProductStatus } from './product-status.enum';
 import { ProductReview } from './product-review.entity';
 import { plainToInstance } from 'class-transformer';
@@ -30,8 +29,6 @@ export class ProductsService {
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(ProductReview)
     private productReviewRepository: Repository<ProductReview>,
-    @InjectRepository(ProductColorsEntity)
-    private productColorRepository: Repository<ProductColorsEntity>,
     @InjectRepository(Brand) private brandRepository: Repository<Brand>,
   ) {}
 
@@ -188,25 +185,6 @@ export class ProductsService {
     );
   }
 
-  async updateProductColors(
-    productColors: ProductColorsEntity[],
-    product_stock: number,
-    productId: number,
-  ) {
-    const found = await this.productRepository.findOne({
-      where: { id: productId },
-    });
-
-    const productColorsArr: ProductColorsEntity[] = [];
-    for (const color of productColors) {
-      productColorsArr.push(this.productColorRepository.create(color));
-    }
-
-    found.product_stock = product_stock;
-    found.colors = productColorsArr;
-    await this.productRepository.save(found);
-  }
-
   async updateProductPrice(price: number, discount_price: number, id: number) {
     const found = await this.productRepository.findOne({
       where: { id },
@@ -223,7 +201,6 @@ export class ProductsService {
       .where('pr.id = :id', { id })
       .innerJoinAndSelect('pr.brand', 'br')
       .innerJoinAndSelect('pr.specifications', 'pr_specs')
-      .leftJoinAndSelect('pr.colors', 'colors')
       .innerJoinAndSelect('pr.images', 'pr_images')
       .innerJoinAndSelect('pr.sub_categories', 'sub_category')
       .getOne();
@@ -242,7 +219,6 @@ export class ProductsService {
       .innerJoinAndSelect('pr.brand', 'br')
       .leftJoinAndSelect('pr.reviews', 'review')
       .leftJoinAndSelect('review.customer', 'customer')
-      .leftJoinAndSelect('pr.colors', 'colors')
       .innerJoinAndSelect('pr.specifications', 'pr_specs')
       .innerJoinAndSelect('pr.images', 'pr_images')
       .innerJoinAndSelect('pr.sub_categories', 'sub_category')
@@ -261,74 +237,66 @@ export class ProductsService {
     });
 
     if (existing) {
-      throw new BadRequestException('Product already exists');
+      throw new BadRequestException(
+        `Product with slug "${createProductDto.slug}" already exists`,
+      );
     }
 
+    // Using the repository's manager for the transaction
     return await this.productRepository.manager.transaction(
       async (transactionalEntityManager) => {
+        // Check SubCategory
         const subCategoryExists = await transactionalEntityManager.exists(
           SubCategory,
           { where: { id: createProductDto.sub_category_id } },
         );
-
         if (!subCategoryExists) {
-          throw new NotFoundException('Sub Category not found!');
+          throw new NotFoundException(
+            `SubCategory with ID ${createProductDto.sub_category_id} not found!`,
+          );
         }
 
+        // Check Brand
         const brandExists = await transactionalEntityManager.exists(Brand, {
           where: { id: createProductDto.brand_id },
         });
-
         if (!brandExists) {
-          throw new NotFoundException('Brand not found!');
+          throw new NotFoundException(
+            `Brand with ID ${createProductDto.brand_id} not found!`,
+          );
         }
 
+        // Create Product instance within the transaction context
         const product = transactionalEntityManager.create(Product, {
-          ...createProductDto,
-          brand: { id: createProductDto.brand_id },
-          sub_categories: [{ id: createProductDto.sub_category_id }],
+          ...createProductDto, // Spread validated DTO properties
+          brand: { id: createProductDto.brand_id }, // Link Brand by ID
+          sub_categories: [{ id: createProductDto.sub_category_id }], // Link SubCategory by ID (as array for ManyToMany)
+          // Explicitly exclude nested DTO arrays if they exist in createProductDto to avoid TypeORM confusion
+          // Or rely on TypeORM to ignore them if they don't match entity properties directly
+          specifications: undefined, // Ensure these are handled below
+          images: undefined, // Ensure these are handled below
         });
 
-        const productSpecs: ProductSpecification[] = [];
+        // Process Specifications (using map for conciseness)
+        const productSpecs = createProductDto.specifications.map((specDto) =>
+          transactionalEntityManager.create(ProductSpecification, specDto),
+        );
 
-        if (createProductDto.specifications.length > 0) {
-          for (const specification of createProductDto.specifications) {
-            const spec = transactionalEntityManager.create(
-              ProductSpecification,
-              specification,
-            );
+        // Process Images (using map for conciseness - FIX condition)
+        // No need for the 'if' if DTO validation ensures non-empty array
+        const productImages = createProductDto.images.map((imageDto) =>
+          transactionalEntityManager.create(ProductImage, imageDto),
+        );
 
-            productSpecs.push(spec);
-          }
-        }
+        // --- Removed Color Processing Section ---
 
-        const productImages: ProductImage[] = [];
-
-        if (createProductDto.specifications.length > 0) {
-          for (const image of createProductDto.images) {
-            const img = transactionalEntityManager.create(ProductImage, image);
-
-            productImages.push(img);
-          }
-        }
-
-        const productColors: ProductColorsEntity[] = [];
-
-        if (createProductDto.colors.length > 0) {
-          for (const color of createProductDto.colors) {
-            const col = transactionalEntityManager.create(
-              ProductColorsEntity,
-              color,
-            );
-
-            productColors.push(col);
-          }
-        }
-
-        product.colors = productColors;
-        product.images = productImages;
+        // Assign the newly created related entities to the product instance
+        // TypeORM will handle saving these due to cascade: true
         product.specifications = productSpecs;
+        product.images = productImages;
+        // product.colors = productColors; // Add back if implementing colors
 
+        // Save the product and its cascaded relations
         return await transactionalEntityManager.save(product);
       },
     );
