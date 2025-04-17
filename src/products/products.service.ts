@@ -70,7 +70,6 @@ export class ProductsService {
     const query = this.productRepository
       .createQueryBuilder('p')
       .leftJoinAndSelect('p.brand', 'brand')
-      .leftJoinAndSelect('p.colors', 'colors')
       .leftJoinAndSelect('p.sub_categories', 'psc')
       .leftJoinAndSelect('psc.parent_category', 'ppc');
 

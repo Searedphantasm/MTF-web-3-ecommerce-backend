@@ -173,12 +173,6 @@ export class InitData1740827355965 implements MigrationInterface {
     INSERT INTO product_specification (id, spec_title, spec_description, product_id)
     VALUES (2, 'مشخصات فنی', 'توضیحات تست', 2);
 
-    -- درج رنگ‌ها برای محصول 2
-    INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-    VALUES (8, 'B107', '217,89,149', 3, true, 2);
-    INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-    VALUES (9, 'C45', '20,45,64', 5, true, 2);
-
 -- درج محصول 3
         INSERT INTO product (id, title, slug, rating, poster, poster_key, alt_text, description, price, product_stock, product_discount_price, product_discount_percentage, status, consumer_guide, contact, created_at, updated_at, brand_id)
         VALUES (
@@ -235,28 +229,6 @@ export class InitData1740827355965 implements MigrationInterface {
                    'توضیحات فنی محصول جدید',
                    3
                );
-
--- درج رنگ‌ها برای محصول 3
-        INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-        VALUES (
-                   10,
-                   'D201',
-                   '150,75,200',
-                   7,
-                   true,
-                   3
-               );
-
-        INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-        VALUES (
-                   11,
-                   'E89',
-                   '45,200,100',
-                   8,
-                   true,
-                   3
-               );
-
 
         INSERT INTO product (id, title, slug, rating, poster, poster_key, alt_text, description, price, product_stock, product_discount_price, product_discount_percentage, status, consumer_guide, contact, created_at, updated_at, brand_id)
         VALUES (
@@ -341,36 +313,6 @@ export class InitData1740827355965 implements MigrationInterface {
                    12,
                    'جزئیات محصول',
                    'ماندگاری 12 ساعته، ضد آب',
-                   5
-               );
-
-        INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-        VALUES (
-                   15,
-                   'M201',
-                   '255,204,153',
-                   7,
-                   true,
-                   4
-               );
-
-        INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-        VALUES (
-                   16,
-                   'R108',
-                   '200,50,70',
-                   4,
-                   true,
-                   5
-               );
-
-        INSERT INTO product_colors_entity (id, code, rgb_code, stock, status, "productId")
-        VALUES (
-                   17,
-                   'R109',
-                   '150,30,50',
-                   6,
-                   true,
                    5
                );
 
